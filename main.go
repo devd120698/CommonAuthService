@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+<<<<<<< HEAD
+=======
+	"fmt"
+>>>>>>> bedf2f5f0666fedb92a8884adf7f514f32b40de2
 	"github.com/labstack/echo"
 	"net/http"
 	"os"
@@ -12,6 +16,10 @@ import (
 func main() {
 	e := echo.New()
 
+<<<<<<< HEAD
+=======
+	fmt.Println("hwuhuwhehuew")
+>>>>>>> bedf2f5f0666fedb92a8884adf7f514f32b40de2
 	e.GET("/signIn", userSignIn)
 
 	go e.Logger.Fatal(e.Start(":9008"))
