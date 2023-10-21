@@ -1,14 +1,41 @@
 package main
 
-import "github.com/labstack/echo"
+import (
+	"context"
+	"github.com/labstack/echo"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+)
 
 func main() {
-	//http.HandleFunc("/signIn", func(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Fprintf(w, "Hello, World!")
-	//})
-	//
-	//http.ListenAndServe(":8080", nil)
 	e := echo.New()
-	e.Logger.Fatal(e.Start(":8000"))
 
+	e.GET("/signIn", userSignIn)
+
+	go e.Logger.Fatal(e.Start(":9008"))
+
+	// Graceful Shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
+	}
+}
+
+func userSignIn(c echo.Context) error {
+
+	type Response struct {
+		Message string `json:"message"`
+	}
+
+	msg := Response{
+		Message: "Sign in route is working",
+	}
+
+	return c.JSON(http.StatusOK, msg)
 }
