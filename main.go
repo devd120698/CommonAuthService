@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,19 +21,23 @@ import (
 func main() {
 	e := echo.New()
 
-	e.GET("/signIn", createUser)
+	e.GET("/createUser", createUser)
 
 	go e.Logger.Fatal(e.Start(":9008"))
 
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	log.Print("sdjhbbsd")
+	signal.Notify(quit)
+	log.Print("sdjhbbsd")
 	<-quit
+	log.Print("sdjhbbsd")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
+
 }
 
 func GetDbConnection() (*sql.DB, error) {
@@ -55,33 +63,61 @@ func GetDbConnection() (*sql.DB, error) {
 
 func createUser(c echo.Context) error {
 
-	//ctx := c.Request().Context()
-	name := c.QueryParam("name")
-	password := c.QueryParam("password")
+	type UserInfo struct {
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		PhoneNo  string `json:"phoneNo"`
+		Address  string `json:"address"`
+		Password string `json:"password"`
+	}
+
+	userInfo := UserInfo{}
+	err := json.NewDecoder(c.Request().Body).Decode(&userInfo)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Couldn't decode request body")
+	}
+
+	//encrypt the password
+	salt := randSeq(64)
+
+	saltedPassword := fmt.Sprintf("%s%s", salt, userInfo.Password)
+
+	hasher := sha256.New()
+	hasher.Write([]byte(saltedPassword))
+	hashedPassword := hex.EncodeToString(hasher.Sum(nil))
 
 	db, err := GetDbConnection()
 	if err != nil {
 		log.Fatal("Coulnt get db connection", err)
 	}
-	fmt.Println("db connection got ->", db)
+	query := "insert into Users (name,email, phoneNo, addedOn, updatedOn, salt, encPassword, address) values (?, ?, ?, ? , ?, ? , ? , ?)"
 
-	query := "insert into Users (name, password) values (?, ?)"
-
-	response, err := db.Exec(query, name, password)
+	response, err := db.Exec(query, userInfo.Name, userInfo.Email, userInfo.PhoneNo, time.Now(), time.Now(),
+		salt, hashedPassword, userInfo.Address)
 	if err != nil {
 		fmt.Println("could not insert into db -> ", err)
 		return err
 	}
 
+	lastId, err := response.LastInsertId()
+
 	type Response struct {
-		Message string      `json:"message"`
-		Result  interface{} `json:"result"`
+		Message string `json:"message"`
+		UserId  int    `json:"userId"`
 	}
 
 	msg := Response{
-		Message: "Create User route is working",
-		Result:  response,
+		Message: "User created",
+		UserId:  int(lastId),
 	}
+	return c.JSON(200, msg)
+}
 
-	return c.JSON(http.StatusOK, msg)
+func randSeq(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
