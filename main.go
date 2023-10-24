@@ -21,17 +21,14 @@ import (
 func main() {
 	e := echo.New()
 
-	e.GET("/createUser", createUser)
+	e.POST("/createUser", createUser)
 
 	go e.Logger.Fatal(e.Start(":9008"))
 
 	// Graceful Shutdown
 	quit := make(chan os.Signal, 1)
-	log.Print("sdjhbbsd")
 	signal.Notify(quit)
-	log.Print("sdjhbbsd")
 	<-quit
-	log.Print("sdjhbbsd")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
