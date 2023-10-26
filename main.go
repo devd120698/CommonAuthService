@@ -22,7 +22,10 @@ func main() {
 	e := echo.New()
 
 	e.POST("/createUser", createUser)
-
+	/*
+		Login API
+		Logout API
+	*/
 	go e.Logger.Fatal(e.Start(":9008"))
 
 	// Graceful Shutdown
