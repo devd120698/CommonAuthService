@@ -22,6 +22,7 @@ func main() {
 	e := echo.New()
 
 	e.POST("/createUser", createUser)
+	e.GET("/getUser", getUser)
 	/*
 		Login API
 		Logout API
@@ -61,15 +62,24 @@ func GetDbConnection() (*sql.DB, error) {
 	return dbConn, nil
 }
 
-func createUser(c echo.Context) error {
-
-	type UserInfo struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		PhoneNo  string `json:"phoneNo"`
-		Address  string `json:"address"`
-		Password string `json:"password"`
+func getUser(c echo.Context) error {
+	userId := c.QueryParam("id")
+	db, err := GetDbConnection()
+	if err != nil {
+		return c.JSON(http.StatusBadGateway, "Couldn't get DB connection")
 	}
+
+}
+
+type UserInfo struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	PhoneNo  string `json:"phoneNo"`
+	Address  string `json:"address"`
+	Password string `json:"password"`
+}
+
+func createUser(c echo.Context) error {
 
 	userInfo := UserInfo{}
 	err := json.NewDecoder(c.Request().Body).Decode(&userInfo)
