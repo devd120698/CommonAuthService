@@ -23,10 +23,7 @@ func main() {
 
 	e.POST("/createUser", createUser)
 	e.GET("/getUser", getUser)
-	/*
-		Login API
-		Logout API
-	*/
+
 	go e.Logger.Fatal(e.Start(":9008"))
 
 	// Graceful Shutdown
