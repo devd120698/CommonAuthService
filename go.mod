@@ -3,13 +3,12 @@ module commonauthsvc
 go 1.21.3
 
 require (
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.4.0
-
 )
 
 require (
-	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
