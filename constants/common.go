@@ -1,6 +1,12 @@
 package constants
 
+// ErrType
 const (
-	BadRequestForm      = "Bad Request"
+	InvalidRequest      = "INVALID_REQUEST"
 	InternalServerError = "Internal Server Error"
+)
+
+// ErrDetails
+const (
+	BadRequestForm = "Bad request, please check API documentation."
 )

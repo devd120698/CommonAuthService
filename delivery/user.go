@@ -30,7 +30,7 @@ func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {
 
 	err := IsRequestValid(c, userInfo)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.BadRequestForm, ErrDetails: "Couldn't decode request body"})
+		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
 	}
 	lastId, err := userHttp.userSvc.CreateUser(c.Request().Context(), userInfo)
 	if err != nil {
