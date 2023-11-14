@@ -23,6 +23,21 @@ func ConfigureHTTPHandler(e *echo.Echo, userSvc svc.UserService) {
 func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 	e.POST("/createUser", userHttp.createUser)
 	e.GET("/getUser", userHttp.getUser)
+	e.POST("/auth", userHttp.signin)
+	e.POST("/verify", userHttp.verifyToken)
+}
+
+func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
+	return nil
+}
+
+func (userHttp *UserHTTPHandler) signin(c echo.Context) error {
+	request := models.UserSignInRequest{}
+	if err := IsRequestValid(c, request); err != nil {
+		return c.JSON(400, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	}
+
+	return nil
 }
 
 func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {

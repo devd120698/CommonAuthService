@@ -22,6 +22,16 @@ type CreateUserResponse struct {
 	UserId  int    `json:"userId"`
 }
 
+type UserSignInRequest struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type UserSignInResponse struct {
+	Token  string `json:"token"`
+	Status string `json:"status"`
+}
+
 type BaseError struct {
 	ErrType    string `json:"errType"`
 	ErrDetails string `json:"errDetails"`
