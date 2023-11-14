@@ -34,20 +34,23 @@ func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
 func (userHttp *UserHTTPHandler) signin(c echo.Context) error {
 	request := models.UserSignInRequest{}
 	if err := IsRequestValid(c, request); err != nil {
-		return c.JSON(400, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+		return c.JSON(http.StatusBadRequest, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
 	}
-
-	return nil
+	res, err := userHttp.UserSvc.SignIn(c.Request().Context(), &request)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.UserUnauthenticated})
+	}
+	return c.JSON(http.StatusAccepted, res)
 }
 
 func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {
-	userInfo := models.UserInfo{}
+	userInfo := &models.UserInfoDB{}
 
 	err := IsRequestValid(c, userInfo)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
 	}
-	lastId, err := userHttp.UserSvc.CreateUser(c.Request().Context(), userInfo)
+	lastId, err := userHttp.UserSvc.CreateUser(c.Request().Context(), *userInfo)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.BaseError{ErrType: constants.InternalServerError, ErrDetails: "Couldn't insert into data"})
 	}

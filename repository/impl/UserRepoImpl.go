@@ -13,7 +13,7 @@ type Repository struct {
 	DbConn *sqlx.DB
 }
 
-func (r *Repository) AddUser(ctx context.Context, userInfo models.UserInfo) (int, error) {
+func (r *Repository) AddUser(ctx context.Context, userInfo models.UserInfoDB) (int, error) {
 	query := "insert into Users (name,email, phoneNo, addedOn, updatedOn, encPassword, address, role, isActive, profileImage) values (?, ?, ?, ? , ?, ? , ? , ?, ?, ?)"
 
 	response, err := r.DbConn.Exec(query, userInfo.Name, userInfo.Email, userInfo.PhoneNo, time.Now(), time.Now(),
@@ -31,9 +31,9 @@ func (r *Repository) AddUser(ctx context.Context, userInfo models.UserInfo) (int
 	return int(lastId), nil
 }
 
-func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*[]models.UserInfo, error) {
+func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*models.UserInfoDB, error) {
 	query := `select * from Users where email = ?`
-	userInfo := make([]models.UserInfo, 0)
+	userInfo := make([]models.UserInfoDB, 0)
 	err := r.DbConn.SelectContext(ctx, &userInfo, query, email)
 	if err != nil {
 		return nil, err
@@ -41,5 +41,5 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*[]model
 	if len(userInfo) == 0 {
 		return nil, &models.BaseError{ErrDetails: "No user with this email ID", ErrType: constants.InvalidRequest}
 	}
-	return &userInfo, nil
+	return &userInfo[0], nil
 }
