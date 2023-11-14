@@ -7,5 +7,5 @@ import (
 
 type UserService interface {
 	CreateUser(ctx context.Context, info models.UserInfo) (int, error)
-	GetUser()
+	GetUser(ctx context.Context, emailID string) (*[]models.UserInfo, error)
 }

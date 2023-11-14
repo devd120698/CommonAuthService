@@ -1,22 +1,23 @@
 package impl
 
 import (
+	"commonauthsvc/constants"
 	"commonauthsvc/models"
 	"context"
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
 type Repository struct {
-	DbConn *sql.DB
+	DbConn *sqlx.DB
 }
 
 func (r *Repository) AddUser(ctx context.Context, userInfo models.UserInfo) (int, error) {
 	query := "insert into Users (name,email, phoneNo, addedOn, updatedOn, encPassword, address, role, isActive, profileImage) values (?, ?, ?, ? , ?, ? , ? , ?, ?, ?)"
 
 	response, err := r.DbConn.Exec(query, userInfo.Name, userInfo.Email, userInfo.PhoneNo, time.Now(), time.Now(),
-		userInfo.Password, userInfo.Address, userInfo.Role, userInfo.IsActive, userInfo.ProfilePicture)
+		userInfo.Password, userInfo.Address, userInfo.Role, userInfo.IsActive, userInfo.ProfileImage)
 	if err != nil {
 		fmt.Println("could not insert into db -> ", err)
 		return 0, err
@@ -28,4 +29,17 @@ func (r *Repository) AddUser(ctx context.Context, userInfo models.UserInfo) (int
 		return 0, err
 	}
 	return int(lastId), nil
+}
+
+func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*[]models.UserInfo, error) {
+	query := `select * from Users where email = ?`
+	userInfo := make([]models.UserInfo, 0)
+	err := r.DbConn.SelectContext(ctx, &userInfo, query, email)
+	if err != nil {
+		return nil, err
+	}
+	if len(userInfo) == 0 {
+		return nil, &models.BaseError{ErrDetails: "No user with this email ID", ErrType: constants.InvalidRequest}
+	}
+	return &userInfo, nil
 }

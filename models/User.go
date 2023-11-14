@@ -1,14 +1,20 @@
 package models
 
+import "gopkg.in/guregu/null.v3"
+
 type UserInfo struct {
-	Name           string `json:"name" validate:"required"`
-	Email          string `json:"email"`
-	PhoneNo        string `json:"phoneNo"`
-	Address        string `json:"address"`
-	Password       string `json:"password"`
-	Role           string `json:"role"`
-	ProfilePicture string `json:"profilePicture"`
-	IsActive       bool   `json:"isActive"`
+	Id           int         `json:"id" db:"id"`
+	Name         string      `json:"name" validate:"required"`
+	Email        string      `json:"email"`
+	PhoneNo      string      `json:"phoneNo" db:"phoneNo"`
+	Address      string      `json:"address"`
+	Password     string      `json:"password"`
+	Role         null.String `json:"role"`
+	IsActive     null.Bool   `json:"isActive" db:"isActive"`
+	AddedOn      string      `json:"addedOn" db:"addedOn"`
+	UpdatedOn    string      `json:"updatedOn" db:"updatedOn"`
+	EncPassword  string      `json:"-" db:"encPassword"`
+	ProfileImage string      `json:"profileImage" db:"profileImage"`
 }
 
 type CreateUserResponse struct {

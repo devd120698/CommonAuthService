@@ -5,9 +5,9 @@ import (
 	repoImpl "commonauthsvc/repository/impl"
 	"commonauthsvc/service/impl"
 	"context"
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	_ "github.com/labstack/gommon/log"
 	"log"
@@ -52,7 +52,7 @@ func gracefullShutdown(e *echo.Echo) {
 	}
 }
 
-func GetDbConnection() (*sql.DB, error) {
+func GetDbConnection() (*sqlx.DB, error) {
 	//connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", "Divyansh", "Divyansh", "localhost", "3306", "CommonAuth")
 	connection := fmt.Sprintf("%s:%s@/%s", "Divyansh", "Divyansh", "CommonAuth")
 	val := url.Values{}
@@ -60,7 +60,7 @@ func GetDbConnection() (*sql.DB, error) {
 	val.Add("parseTime", "True")
 	val.Add("loc", "Local")
 	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
-	dbConn, err := sql.Open(`mysql`, dsn)
+	dbConn, err := sqlx.Open(`mysql`, dsn)
 	if err != nil {
 		return nil, err
 	}

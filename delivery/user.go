@@ -10,12 +10,12 @@ import (
 )
 
 type UserHTTPHandler struct {
-	userSvc svc.UserService
+	UserSvc svc.UserService
 }
 
 func ConfigureHTTPHandler(e *echo.Echo, userSvc svc.UserService) {
 	userHTTPHandler := UserHTTPHandler{
-		userSvc: userSvc,
+		UserSvc: userSvc,
 	}
 	userHTTPHandler.AddHandlers(e)
 }
@@ -32,7 +32,7 @@ func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
 	}
-	lastId, err := userHttp.userSvc.CreateUser(c.Request().Context(), userInfo)
+	lastId, err := userHttp.UserSvc.CreateUser(c.Request().Context(), userInfo)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, models.BaseError{ErrType: constants.InternalServerError, ErrDetails: "Couldn't insert into data"})
 	}
@@ -44,12 +44,12 @@ func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {
 }
 
 func (userHttp *UserHTTPHandler) getUser(c echo.Context) error {
-	//_ = c.QueryParam("id")
-	//_, err := GetDbConnection()
-	//if err != nil {
-	//	return c.JSON(http.StatusBadGateway, "Couldn't get DB connection")
-	//}
-	return nil
+	emailID := c.QueryParam("email")
+	user, err := userHttp.UserSvc.GetUser(c.Request().Context(), emailID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	}
+	return c.JSON(http.StatusOK, user)
 }
 
 func IsRequestValid(c echo.Context, m interface{}) error {
