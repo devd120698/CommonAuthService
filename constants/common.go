@@ -8,7 +8,7 @@ const (
 
 // ErrDetails
 const (
-	BadRequestForm      = "Bad request, please check API documentation."
-	UserUnauthenticated = "User couldn't be authenticated."
-	UserAlreadyExists   = "User with provided emailID already registered."
+	BadRequestForm    = "Bad request, please check API documentation."
+	InvalidCreds      = "Invalid credentials. Please try again."
+	UserAlreadyExists = "User with provided emailID already registered."
 )

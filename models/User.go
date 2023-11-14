@@ -1,6 +1,9 @@
 package models
 
-import "gopkg.in/guregu/null.v3"
+import (
+	"github.com/golang-jwt/jwt/v5"
+	"gopkg.in/guregu/null.v3"
+)
 
 type UserInfoDB struct {
 	Id           int         `json:"-" db:"id"`
@@ -45,6 +48,12 @@ type UserSignInRequest struct {
 type UserSignInResponse struct {
 	Token  string `json:"token"`
 	Status string `json:"status"`
+}
+
+type JwtCustomClaims struct {
+	Email string `json:"name"`
+	Role  string `json:"admin"`
+	jwt.RegisteredClaims
 }
 
 type BaseError struct {

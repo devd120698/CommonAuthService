@@ -4,6 +4,7 @@ import (
 	"commonauthsvc/constants"
 	"commonauthsvc/models"
 	svc "commonauthsvc/service"
+	"encoding/json"
 	"github.com/labstack/echo"
 	"log"
 	"net/http"
@@ -33,12 +34,17 @@ func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
 
 func (userHttp *UserHTTPHandler) signin(c echo.Context) error {
 	request := models.UserSignInRequest{}
-	if err := IsRequestValid(c, request); err != nil {
-		return c.JSON(http.StatusBadRequest, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	//if err := IsRequestValid(c, request); err != nil {
+	//	return c.JSON(http.StatusBadRequest, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	//}
+	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Couldn't decode request body")
 	}
 	res, err := userHttp.UserSvc.SignIn(c.Request().Context(), &request)
 	if err != nil {
-		return c.JSON(http.StatusForbidden, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.UserUnauthenticated})
+		log.Println(err)
+		return c.JSON(http.StatusForbidden, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.InvalidCreds})
 	}
 	return c.JSON(http.StatusAccepted, res)
 }
@@ -46,13 +52,17 @@ func (userHttp *UserHTTPHandler) signin(c echo.Context) error {
 func (userHttp *UserHTTPHandler) createUser(c echo.Context) error {
 	userInfo := &models.UserInfoDB{}
 
-	err := IsRequestValid(c, userInfo)
+	//err := IsRequestValid(c, userInfo)
+	//if err != nil {
+	//	return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	//}
+	err := json.NewDecoder(c.Request().Body).Decode(&userInfo)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+		return c.JSON(http.StatusBadRequest, "Couldn't decode request body")
 	}
 	lastId, err := userHttp.UserSvc.CreateUser(c.Request().Context(), *userInfo)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, models.BaseError{ErrType: constants.InternalServerError, ErrDetails: "Couldn't insert into data"})
+		return c.JSON(http.StatusInternalServerError, models.BaseError{ErrType: err.Error(), ErrDetails: err.Error()})
 	}
 	msg := models.CreateUserResponse{
 		Message: "User created",

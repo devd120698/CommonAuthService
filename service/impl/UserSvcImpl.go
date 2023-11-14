@@ -5,9 +5,11 @@ import (
 	"commonauthsvc/models"
 	repo "commonauthsvc/repository"
 	"context"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/guregu/null.v3"
 	"log"
+	"time"
 )
 
 type UserServiceImpl struct {
@@ -16,8 +18,8 @@ type UserServiceImpl struct {
 
 func (svc *UserServiceImpl) CreateUser(ctx context.Context, userInfo models.UserInfoDB) (int, error) {
 	// check for emailID
-	_, err := svc.UserRepo.GetUserByEmail(ctx, userInfo.Email)
-	if err != nil {
+	res, err := svc.UserRepo.GetUserByEmail(ctx, userInfo.Email)
+	if (err != nil || res != nil) && err.Error() != "No user with this email ID" {
 		log.Println("Couldnt get user by emailID ", err)
 		return 0, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.UserAlreadyExists}
 	}
@@ -49,13 +51,30 @@ func (svc *UserServiceImpl) GetUser(ctx context.Context, emailID string) (*model
 
 func (svc *UserServiceImpl) SignIn(ctx context.Context, request *models.UserSignInRequest) (*models.UserSignInResponse, error) {
 	res, err := svc.UserRepo.GetUserByEmail(ctx, request.Email)
-	if err != nil {
-		return nil, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.UserUnauthenticated}
+	if (err != nil) && err.Error() != "No user with this email ID" {
+		return nil, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.InvalidCreds}
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(request.Password))
+	if err := bcrypt.CompareHashAndPassword([]byte(res.EncPassword), []byte(request.Password)); err != nil {
+		log.Println("invalid Credentials")
+		return nil, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.InvalidCreds}
+	}
+	// create a JWT token and return
+	// Set custom claims
+	claims := &models.JwtCustomClaims{
+		Email: res.Email,
+		Role:  res.Role.String,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 25)),
+		},
+	}
+	// Create token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		return nil, err
 	}
-	return &models.UserSignInResponse{Status: "User Authenticated"}, nil
+	return &models.UserSignInResponse{Status: "User Authenticated", Token: t}, nil
 }
