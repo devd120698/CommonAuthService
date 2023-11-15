@@ -64,3 +64,7 @@ type BaseError struct {
 func (err *BaseError) Error() string {
 	return err.ErrDetails
 }
+
+type Response struct {
+	Message string `json:"message"`
+}

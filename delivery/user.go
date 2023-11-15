@@ -5,9 +5,11 @@ import (
 	"commonauthsvc/models"
 	svc "commonauthsvc/service"
 	"encoding/json"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type UserHTTPHandler struct {
@@ -29,7 +31,31 @@ func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 }
 
 func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
-	return nil
+	// Get token from 'Authorization' header
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Authorization header is missing")
+	}
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if token == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid token")
+	}
+	tokenClaims, err := jwt.ParseWithClaims(token, &models.JwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil {
+		log.Printf("error parsing token: %v\n", err)
+		return c.JSON(http.StatusBadRequest, &models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: err.Error()})
+	}
+
+	emailID := tokenClaims.Claims.(*models.JwtCustomClaims).Email
+	//get user info from emailID
+	user, err := userHttp.UserSvc.GetUser(c.Request().Context(), emailID)
+	if err != nil || user == nil {
+		return c.JSON(http.StatusBadRequest, models.BaseError{ErrType: constants.InvalidRequest, ErrDetails: constants.BadRequestForm})
+	}
+	log.Println("Token is valid")
+	return c.JSON(http.StatusOK, models.Response{Message: "Token in valid"})
 }
 
 func (userHttp *UserHTTPHandler) signin(c echo.Context) error {
