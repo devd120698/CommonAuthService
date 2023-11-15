@@ -65,7 +65,7 @@ func (svc *UserServiceImpl) SignIn(ctx context.Context, request *models.UserSign
 		Email: res.Email,
 		Role:  res.Role.String,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 25)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 90)),
 		},
 	}
 	// Create token with claims
