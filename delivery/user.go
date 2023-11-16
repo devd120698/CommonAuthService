@@ -28,6 +28,19 @@ func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 	e.GET("/getUser", userHttp.getUser)
 	e.POST("/auth", userHttp.signin)
 	e.POST("/verify", userHttp.verifyToken)
+	e.PATCH("/signout", userHttp.signOut)
+}
+
+func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Authorization header is missing")
+	}
+	//session management and cookies
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if token == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid token")
+	}
 }
 
 func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
