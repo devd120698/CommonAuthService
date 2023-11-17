@@ -41,6 +41,7 @@ func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
 	if token == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid token")
 	}
+	return nil
 }
 
 func (userHttp *UserHTTPHandler) verifyToken(c echo.Context) error {
