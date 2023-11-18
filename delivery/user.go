@@ -28,7 +28,7 @@ func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 	e.GET("/getUser", userHttp.getUser)
 	e.POST("/auth", userHttp.signin)
 	e.POST("/verify", userHttp.verifyToken)
-	e.PATCH("/signout", userHttp.signOut)
+	e.PATCH("/signOut", userHttp.signOut)
 }
 
 func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
