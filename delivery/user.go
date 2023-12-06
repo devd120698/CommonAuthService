@@ -41,6 +41,9 @@ func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
 	if token == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid token")
 	}
+	// invalidate token
+
+	//RBAC setup
 	return nil
 }
 
