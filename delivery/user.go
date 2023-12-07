@@ -122,16 +122,3 @@ func (userHttp *UserHTTPHandler) getUser(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, user)
 }
-
-func IsRequestValid(c echo.Context, m interface{}) error {
-	err := c.Bind(m)
-	if err != nil {
-		log.Println(err)
-		return &models.BaseError{ErrType: constants.BadRequestForm}
-	}
-	err = c.Validate(m)
-	if err != nil {
-		return err
-	}
-	return nil
-}
