@@ -29,6 +29,11 @@ func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 	e.POST("/auth", userHttp.signin)
 	e.POST("/verify", userHttp.verifyToken)
 	e.PATCH("/signOut", userHttp.signOut)
+	e.PATCH("/resetPassword", userHttp.resetPassword)
+}
+
+func (userHttp *UserHTTPHandler) resetPassword(c echo.Context) error {
+
 }
 
 func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
