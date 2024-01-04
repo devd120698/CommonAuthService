@@ -33,7 +33,7 @@ func (userHttp *UserHTTPHandler) AddHandlers(e *echo.Echo) {
 }
 
 func (userHttp *UserHTTPHandler) resetPassword(c echo.Context) error {
-
+	return nil
 }
 
 func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
