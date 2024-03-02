@@ -39,7 +39,7 @@ func (userHttp *UserHTTPHandler) resetPassword(c echo.Context) error {
 func (userHttp *UserHTTPHandler) signOut(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
 	if authHeader == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Authorization header is missing")
+		return echo.NewHTTPError(http.StatusBadRequest, "Authorization header is missing.")
 	}
 	//session management and cookies
 	token := strings.TrimPrefix(authHeader, "Bearer ")
