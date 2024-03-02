@@ -17,5 +17,5 @@ func ConfigureNoteHttpHandler(e *echo.Echo, noteSvc svc.NotesSvc) {
 }
 
 func (noteHttp *NotesHTTPHandler) AddHandlers(e *echo.Echo) {
-	e.POST("/createNote", noteHttp.createNotes)
+	//e.POST("/createNote", noteHttp.createNotes)
 }
